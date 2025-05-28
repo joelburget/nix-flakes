@@ -47,7 +47,7 @@ in rec {
 			owner = "GoogleCloudPlatform";
 			repo = "opentelemetry-operations-collector";
 			rev = "v${version}";
-			hash = "sha256-0000000000000000000000000000000000000000000000000000000000000000";
+			hash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
 		};
 
 		# Upstream repository uses Go modules, but doesn't vendor deps.
