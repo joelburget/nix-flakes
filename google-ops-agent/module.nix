@@ -8,22 +8,16 @@ let
   otel       = pkgs.otelopscol;
   fluentBit  = pkgs.fluent-bit;
 
-  # Build a real config file only when the user supplied settings.
-  # When neither `settings` nor `configPath` are given we *do not* point the
-  # agent engine to an (almost) empty YAML file – this way the agent will fall
-  # back to its built-in defaults instead of erroring out due to a missing
-  # logging/metrics section.
-  configFileOpt = lib.optional (cfg.settings != {}) (
+  # Build a real config file only when the user supplied settings.  If both
+  # `settings == {}` and `configPath == null` we leave `configFile` as `null`
+  # so the agent falls back to its built-in defaults.
+  configFile = lib.optionalString (cfg.settings != {}) (
     pkgs.writeText "ops-agent-config.yaml" (builtins.toJSON cfg.settings)
   );
 
-  # Compute the `-in …` flag only when we actually have an external config.
-  configFlag =
-    if cfg.configPath != null then
-      "-in ${cfg.configPath}"
-    else if configFileOpt != [] then  # optional returns a singleton list
-      "-in ${builtins.head configFileOpt}"
-    else "";
+  # Compute the `-in …` argument only when we actually have an external file.
+  configFlag = lib.optionalString (cfg.configPath != null) "-in ${cfg.configPath}" +
+               lib.optionalString (cfg.configPath == null && configFile != "") "-in ${configFile}";
 in
 {
   ###### 1.  Module options ###################################################
@@ -80,7 +74,7 @@ in
     # defaults and do **not** create the symlink (prevents endless loop).
     environment.etc = lib.mkIf (cfg.configPath != null || cfg.settings != {}) {
       "google-cloud-ops-agent/config.yaml".source =
-        if cfg.configPath != null then cfg.configPath else builtins.head configFileOpt;
+        if cfg.configPath != null then cfg.configPath else configFile;
     };
 
     # Main "parent" unit – validates & generates runtime files
