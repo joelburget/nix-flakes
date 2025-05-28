@@ -8,14 +8,22 @@ let
   otel       = pkgs.otelopscol;
   fluentBit  = pkgs.fluent-bit;
 
-  # Build a real file only when the user supplied settings. Otherwise create
-  # an *empty* YAML file so we never point a symlink back onto itself.
-  configFile =
-    if cfg.settings == {} then
-      pkgs.writeText "empty-ops-agent-config.yaml" "{}\n"
-    else
-      pkgs.writeText "ops-agent-config.yaml"
-        (builtins.toJSON cfg.settings);  # simple JSON→YAML shim works for most
+  # Build a real config file only when the user supplied settings.
+  # When neither `settings` nor `configPath` are given we *do not* point the
+  # agent engine to an (almost) empty YAML file – this way the agent will fall
+  # back to its built-in defaults instead of erroring out due to a missing
+  # logging/metrics section.
+  configFileOpt = lib.optional (cfg.settings != {}) (
+    pkgs.writeText "ops-agent-config.yaml" (builtins.toJSON cfg.settings)
+  );
+
+  # Compute the `-in …` flag only when we actually have an external config.
+  configFlag =
+    if cfg.configPath != null then
+      "-in ${cfg.configPath}"
+    else if configFileOpt != [] then  # optional returns a singleton list
+      "-in ${builtins.head configFileOpt}"
+    else "";
 in
 {
   ###### 1.  Module options ###################################################
@@ -72,7 +80,7 @@ in
     # defaults and do **not** create the symlink (prevents endless loop).
     environment.etc = lib.mkIf (cfg.configPath != null || cfg.settings != {}) {
       "google-cloud-ops-agent/config.yaml".source =
-        if cfg.configPath != null then cfg.configPath else configFile;
+        if cfg.configPath != null then cfg.configPath else builtins.head configFileOpt;
     };
 
     # Main "parent" unit – validates & generates runtime files
@@ -90,7 +98,7 @@ in
         RemainAfterExit = true;
 
         # Validate & render configs for sub-agents
-        ExecStart = "${cfg.packageOpsAgent}/bin/google_cloud_ops_agent_engine -in ${configFile}";
+        ExecStart = "${cfg.packageOpsAgent}/bin/google_cloud_ops_agent_engine ${configFlag}";
       };
     };
 
@@ -106,7 +114,7 @@ in
         Restart      = "on-failure";
         RestartSec   = 5;
 
-        ExecStartPre = "${cfg.packageOpsAgent}/bin/google_cloud_ops_agent_engine -service=fluentbit -in ${configFile}";
+        ExecStartPre = "${cfg.packageOpsAgent}/bin/google_cloud_ops_agent_engine -service=fluentbit ${configFlag}";
 
         ExecStart = "${cfg.packageFluentBit}/bin/fluent-bit --config /run/google-cloud-ops-agent-fluent-bit/fluent_bit_main.conf --parsers_file /run/google-cloud-ops-agent-fluent-bit/fluent_bit_parsers.conf --log_level info";
       };
@@ -124,7 +132,7 @@ in
         Restart      = "on-failure";
         RestartSec   = 5;
 
-        ExecStartPre = "${cfg.packageOpsAgent}/bin/google_cloud_ops_agent_engine -service=otel -in ${configFile}";
+        ExecStartPre = "${cfg.packageOpsAgent}/bin/google_cloud_ops_agent_engine -service=otel ${configFlag}";
 
         ExecStart = "${cfg.packageOtel}/bin/otelopscol --config /run/google-cloud-ops-agent-otel/otel.yaml";
       };
