@@ -58,7 +58,7 @@ in rec {
 		  substituteInPlace go.mod --replace "go 1.24" "go 1.22"
 		'';
 
-		subPackages = [ "cmd/otelopscol" ];
+		subPackages = [ "otelopscol" ];
 
 		meta = {
 			description = "OpenTelemetry Collector distribution shipped with the Google Cloud Ops Agent (sub-agent for metrics & traces)";
