@@ -41,7 +41,7 @@ in rec {
 	# package) once to obtain the correct values and update them.
 	otelopscol = pkgs.buildGoModule {
 		pname = "otelopscol";
-		version = "0.0.2"; # latest tagged version at time of packaging
+		version = "0.127.0"; # latest tagged version at time of packaging
 
 		src = pkgs.fetchFromGitHub {
 			owner = "GoogleCloudPlatform";
