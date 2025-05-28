@@ -53,6 +53,11 @@ in rec {
 		# Upstream repository uses Go modules, but doesn't vendor deps.
 		vendorHash = "sha256-Z5c4ezYHSG7Mx+m3SSq0TTZW5tPwW/X5N9Obq1bNtJ4=";
 
+		postPatch = ''
+		  # Allow building with the Go version available in this nixpkgs (1.22)
+		  substituteInPlace go.mod --replace "go 1.24" "go 1.22"
+		'';
+
 		subPackages = [ "cmd/otelopscol" ];
 
 		meta = {
