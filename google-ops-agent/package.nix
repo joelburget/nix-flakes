@@ -51,7 +51,7 @@ in rec {
 		};
 
 		# Upstream repository uses Go modules, but doesn't vendor deps.
-		vendorHash = lib.fakeSha256;
+		vendorHash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
 
 		subPackages = [ "cmd/otelopscol" ];
 
