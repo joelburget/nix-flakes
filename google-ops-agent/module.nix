@@ -8,9 +8,11 @@ let
   otel       = pkgs.otelopscol;
   fluentBit  = pkgs.fluent-bit;
 
-  # Where we'll drop the user-supplied YAML (if any)
+  # Build a real file only when the user supplied settings. Otherwise create
+  # an *empty* YAML file so we never point a symlink back onto itself.
   configFile =
-    if cfg.settings == {} then "/etc/google-cloud-ops-agent/config.yaml"
+    if cfg.settings == {} then
+      pkgs.writeText "empty-ops-agent-config.yaml" "{}\n"
     else
       pkgs.writeText "ops-agent-config.yaml"
         (builtins.toJSON cfg.settings);  # simple JSON→YAML shim works for most
@@ -65,9 +67,13 @@ in
   ###### 2.  Implementation ###################################################
   config = lib.mkIf cfg.enable {
 
-    # Place config.yaml (either from user path or generated from settings)
-    environment.etc."google-cloud-ops-agent/config.yaml".source =
-      if cfg.configPath != null then cfg.configPath else configFile;
+    # Place config.yaml if the user supplied one or we generated one from
+    # settings. When neither is the case we rely on the agent's built-in
+    # defaults and do **not** create the symlink (prevents endless loop).
+    environment.etc = lib.mkIf (cfg.configPath != null || cfg.settings != {}) {
+      "google-cloud-ops-agent/config.yaml".source =
+        if cfg.configPath != null then cfg.configPath else configFile;
+    };
 
     # Main "parent" unit – validates & generates runtime files
     systemd.services.google-cloud-ops-agent = {
