@@ -25,7 +25,7 @@
 
 				nixosModules = import ./modules.nix;
 			}) // {
-				overlay = self.overlays.default;
+				overlay = import ./overlay.nix;
 				nixosModules.default = self.nixosModules.google-ops-agent;
 				nixosModules.google-ops-agent = import ./google-ops-agent/module.nix;
 			};
