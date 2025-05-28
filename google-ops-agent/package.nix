@@ -38,8 +38,10 @@ in rec {
 		pname   = "fluent-bit-google";
 		version = version; # align with Ops Agent tag, e.g. 2.46.1
 
-		# Source lives inside the Ops Agent monorepo.
-		src = opsAgentSrc + "/subagents/fluent-bit";
+		# Source lives inside the Ops Agent monorepo – point `sourceRoot`
+		# so the build system changes into that directory after unpacking.
+		src = opsAgentSrc;
+		sourceRoot = "source/subagents/fluent-bit";
 
 		# Disable bundled deps download – rely on Nix inputs only.
 		FLB_EMBED_PLUGINS = "yes";
