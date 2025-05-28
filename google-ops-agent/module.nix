@@ -116,7 +116,7 @@ in
 
         ExecStartPre = "${cfg.packageOpsAgent}/bin/google_cloud_ops_agent_engine -service=fluentbit ${configFlag}";
 
-        ExecStart = "${cfg.packageFluentBit}/bin/fluent-bit --config /run/google-cloud-ops-agent-fluent-bit/fluent_bit_main.conf --parsers_file /run/google-cloud-ops-agent-fluent-bit/fluent_bit_parsers.conf --log_level info";
+        ExecStart = "${cfg.packageFluentBit}/bin/fluent-bit --config /run/google-cloud-ops-agent-fluent-bit/fluent_bit_main.conf -R /run/google-cloud-ops-agent-fluent-bit/fluent_bit_parsers.conf --log_level info";
       };
     };
 
