@@ -51,7 +51,7 @@ in rec {
 		};
 
 		# Upstream repository uses Go modules, but doesn't vendor deps.
-		vendorHash = "sha256-Z5c4ezYHSG7Mx+m3SSq0TTZW5tPwW/X5N9Obq1bNtJ4=";
+		vendorHash = "sha256-enHmzau2QS6xj+rDRJDxqdlskRjxSktAdJUChfLTrtY=";
 
 		postPatch = ''
 		  # Allow building with the Go version available in this nixpkgs (1.22)
