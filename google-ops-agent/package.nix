@@ -28,4 +28,40 @@ in rec {
 			sourceProvenance = [ lib.sourceTypes.fromSource ];
 		};
 	};
+
+	# Logging sub-agent used by the Ops Agent.
+	# We currently rely on the vanilla fluent-bit package from nixpkgs.  If the
+	# upstream Google fork ever becomes necessary (for the Google Cloud output
+	# plugin), we can replace this with a custom build that points to the
+	# `subagents/fluent-bit` directory inside the Ops Agent repository.
+	fluent-bit = pkgs.fluent-bit;
+
+	# Metrics/Tracing sub-agent (OpenTelemetry Collector build used by the Ops Agent).
+	# NOTE: the hashes below are placeholders – run `nix flake check` (or build the
+	# package) once to obtain the correct values and update them.
+	otelopscol = pkgs.buildGoModule {
+		pname = "otelopscol";
+		version = "0.0.2"; # latest tagged version at time of packaging
+
+		src = pkgs.fetchFromGitHub {
+			owner = "GoogleCloudPlatform";
+			repo = "opentelemetry-operations-collector";
+			rev = "v${version}";
+			hash = lib.fakeSha256;
+		};
+
+		# Upstream repository uses Go modules, but doesn't vendor deps.
+		vendorHash = lib.fakeSha256;
+
+		subPackages = [ "cmd/otelopscol" ];
+
+		meta = {
+			description = "OpenTelemetry Collector distribution shipped with the Google Cloud Ops Agent (sub-agent for metrics & traces)";
+			license = lib.licenses.asl20;
+			homepage = "https://github.com/GoogleCloudPlatform/opentelemetry-operations-collector";
+			mainProgram = "otelopscol";
+			platforms = lib.platforms.linux;
+			sourceProvenance = [ lib.sourceTypes.fromSource ];
+		};
+	};
 }
