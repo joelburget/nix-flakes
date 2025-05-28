@@ -39,9 +39,9 @@ in rec {
 	# Metrics/Tracing sub-agent (OpenTelemetry Collector build used by the Ops Agent).
 	# NOTE: the hashes below are placeholders – run `nix flake check` (or build the
 	# package) once to obtain the correct values and update them.
-	otelopscol = pkgs.buildGoModule {
+	otelopscol = pkgs.buildGoModule rec {
 		pname = "otelopscol";
-		version = "0.127.0"; # latest tagged version at time of packaging
+		version = "0.127.0"; # latest tagged version
 
 		src = pkgs.fetchFromGitHub {
 			owner = "GoogleCloudPlatform";
