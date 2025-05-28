@@ -29,12 +29,27 @@ in rec {
 		};
 	};
 
-	# Logging sub-agent used by the Ops Agent.
-	# We currently rely on the vanilla fluent-bit package from nixpkgs.  If the
-	# upstream Google fork ever becomes necessary (for the Google Cloud output
-	# plugin), we can replace this with a custom build that points to the
-	# `subagents/fluent-bit` directory inside the Ops Agent repository.
-	fluent-bit = pkgs.fluent-bit;
+	# Logging sub-agent used by the Ops Agent (Google-patched Fluent Bit fork).
+	# The Google Cloud Ops Agent ships its own fork of Fluent-Bit that adds the
+	# Stackdriver output plugin and a couple of minor patches.  Build that
+	# variant so that the `stackdriver` output configured by the agent engine
+	# actually exists.
+	fluent-bit = pkgs.fluent-bit.overrideAttrs (_: {
+		pname   = "fluent-bit-google";
+		version = version; # align with Ops Agent tag, e.g. 2.46.1
+
+		# Source lives inside the Ops Agent monorepo.
+		src = opsAgentSrc + "/subagents/fluent-bit";
+
+		# Disable bundled deps download – rely on Nix inputs only.
+		FLB_EMBED_PLUGINS = "yes";
+
+		postPatch = ''
+			# make sure CMake can find the bundled google output plugin sources
+			substituteInPlace CMakeLists.txt \
+				--replace "bundled-out_google_cloud" "bundled-out_google_cloud"
+		'';
+	});
 
 	# Metrics/Tracing sub-agent (OpenTelemetry Collector build used by the Ops Agent).
 	# NOTE: the hashes below are placeholders – run `nix flake check` (or build the
