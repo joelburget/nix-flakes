@@ -6,7 +6,7 @@ let
   # Convenience aliases for the packages we exported in the overlay
   opsAgent   = pkgs.google-ops-agent;   # engine + diagnostics + wrapper
   otel       = pkgs.otelopscol;
-  fluentBit  = pkgs.fluent-bit;
+  fluentBit  = pkgs.google-fluent-bit or pkgs.fluent-bit;
 
   # Build a real config file only when the user supplied settings.  If both
   # `settings == {}` and `configPath == null` we leave `configFile` as `null`
@@ -34,7 +34,7 @@ in
     packageFluentBit = lib.mkOption {
       type        = lib.types.package;
       default     = fluentBit;
-      defaultText = lib.literalExpression "pkgs.fluent-bit";
+      defaultText = lib.literalExpression "pkgs.google-fluent-bit or pkgs.fluent-bit";
       description = "Package that provides the Fluent-Bit binary.";
     };
 
