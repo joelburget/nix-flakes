@@ -47,11 +47,11 @@ in rec {
 			owner = "GoogleCloudPlatform";
 			repo = "opentelemetry-operations-collector";
 			rev = "v${version}";
-			hash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
+			hash = "sha256-Z5c4ezYHSG7Mx+m3SSq0TTZW5tPwW/X5N9Obq1bNtJ4=";
 		};
 
 		# Upstream repository uses Go modules, but doesn't vendor deps.
-		vendorHash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
+		vendorHash = "sha256-Z5c4ezYHSG7Mx+m3SSq0TTZW5tPwW/X5N9Obq1bNtJ4=";
 
 		subPackages = [ "cmd/otelopscol" ];
 
