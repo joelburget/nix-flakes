@@ -90,11 +90,7 @@ in
         RemainAfterExit = true;
 
         # Validate & render configs for sub-agents
-        ExecStart = [
-          "${cfg.packageOpsAgent}/bin/google_cloud_ops_agent_engine"
-          "-in"
-          "${configFile}"
-        ];
+        ExecStart = "${cfg.packageOpsAgent}/bin/google_cloud_ops_agent_engine -in ${configFile}";
       };
     };
 
@@ -110,22 +106,9 @@ in
         Restart      = "on-failure";
         RestartSec   = 5;
 
-        ExecStartPre = [
-          "${cfg.packageOpsAgent}/bin/google_cloud_ops_agent_engine"
-          "-service=fluentbit"
-          "-in"
-          "${configFile}"
-        ];
+        ExecStartPre = "${cfg.packageOpsAgent}/bin/google_cloud_ops_agent_engine -service=fluentbit -in ${configFile}";
 
-        ExecStart = [
-          "${cfg.packageFluentBit}/bin/fluent-bit"
-          "--config"
-          "/run/google-cloud-ops-agent-fluent-bit/fluent_bit_main.conf"
-          "--parser"
-          "/run/google-cloud-ops-agent-fluent-bit/fluent_bit_parser.conf"
-          "--log_level"
-          "info"
-        ];
+        ExecStart = "${cfg.packageFluentBit}/bin/fluent-bit --config /run/google-cloud-ops-agent-fluent-bit/fluent_bit_main.conf --parser /run/google-cloud-ops-agent-fluent-bit/fluent_bit_parser.conf --log_level info";
       };
     };
 
@@ -141,18 +124,9 @@ in
         Restart      = "on-failure";
         RestartSec   = 5;
 
-        ExecStartPre = [
-          "${cfg.packageOpsAgent}/bin/google_cloud_ops_agent_engine"
-          "-service=otel"
-          "-in"
-          "${configFile}"
-        ];
+        ExecStartPre = "${cfg.packageOpsAgent}/bin/google_cloud_ops_agent_engine -service=otel -in ${configFile}";
 
-        ExecStart = [
-          "${cfg.packageOtel}/bin/otelopscol"
-          "--config"
-          "/run/google-cloud-ops-agent-otel/otel.yaml"
-        ];
+        ExecStart = "${cfg.packageOtel}/bin/otelopscol --config /run/google-cloud-ops-agent-otel/otel.yaml";
       };
     };
   };
